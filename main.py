@@ -4,8 +4,9 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision import transforms
+torch.cuda.empty_cache()
 
-batch_size = 64
+batch_size = 32
 lr = 0.001
 epochs = 10
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
