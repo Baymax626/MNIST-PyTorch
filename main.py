@@ -1,9 +1,9 @@
-
+import matplotlib.pyplot as plt
 import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import datasets
-from torchvision.transforms import transforms
+from torchvision import transforms
 
 batch_size = 64
 lr = 0.001
@@ -80,7 +80,7 @@ def train(dataloader, model, loss_fn, optimizer):
         optimizer.step()
 
         total_loss += loss.item()
-        _ , predicted = y_pred.max(y_pred,1)
+        predicted = y_pred.argmax(1)
         total += y.size(0)
         correct += predicted.eq(y).sum().item()
     avg_loss = total_loss / len(dataloader)
@@ -98,9 +98,38 @@ def test(dataloader, model, loss_fn):
             y_pred = model(x)
             loss = loss_fn(y_pred, y)
             total_loss += loss.item()
-            _ , predicted = y_pred.max(y_pred,1)
+            predicted = y_pred.argmax(1)
             total += y.size(0)
             correct += predicted.eq(y).sum().item()
     avg_loss = total_loss / len(dataloader)
     accuracy = 100 * correct / len(dataloader.dataset)
     return avg_loss, accuracy
+
+train_losses = []
+train_accuracies = []
+test_losses = []
+test_accuracies = []
+
+for epoch in range(epochs):
+    train_loss, train_accuracy = train(train_loader, model, loss_fn, optimizer)
+    test_loss, test_accuracy = test(test_loader, model, loss_fn)
+    train_losses.append(train_loss)
+    train_accuracies.append(train_accuracy)
+    test_losses.append(test_loss)
+    test_accuracies.append(test_accuracy)
+    print(f"Epoch {epoch+1}/{epochs}: Train Loss={train_loss:.4f}, Train Acc={train_accuracy:.2f}% | Test Loss={test_loss:.4f}, Test Acc={test_accuracy:.2f}%")
+
+plt.figure(figsize=(12,4))
+plt.subplot(1,2,1)
+plt.plot(train_losses, label="Train Loss")
+plt.plot(test_losses, label="Test Loss")
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+plt.subplot(1,2,2)
+plt.plot(train_accuracies, label='Train Acc')
+plt.plot(test_accuracies, label='Test Acc')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy (%)')
+plt.legend()
+plt.show()
