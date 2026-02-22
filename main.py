@@ -1,6 +1,6 @@
 
 import torch
-from torch import nn
+from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision.transforms import transforms
@@ -60,3 +60,47 @@ class Net(nn.Module):
         return x
 
 model = Net().to(device)
+
+loss_fn = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=lr)
+
+def train(dataloader, model, loss_fn, optimizer):
+    model.train()
+    total_loss = 0.0
+    correct = 0
+    total = 0
+    for x , y in dataloader:
+        x , y = x.to(device), y.to(device)
+        #正向传播
+        y_pred = model(x)
+        loss = loss_fn(y_pred, y)
+        #反向传播
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        total_loss += loss.item()
+        _ , predicted = y_pred.max(y_pred,1)
+        total += y.size(0)
+        correct += predicted.eq(y).sum().item()
+    avg_loss = total_loss / len(dataloader)
+    accuracy = 100 * correct / len(dataloader.dataset)
+    return avg_loss, accuracy
+
+def test(dataloader, model, loss_fn):
+    model.eval()
+    total_loss = 0.0
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for x , y in dataloader:
+            x , y = x.to(device), y.to(device)
+            y_pred = model(x)
+            loss = loss_fn(y_pred, y)
+            total_loss += loss.item()
+            _ , predicted = y_pred.max(y_pred,1)
+            total += y.size(0)
+            correct += predicted.eq(y).sum().item()
+    avg_loss = total_loss / len(dataloader)
+    accuracy = 100 * correct / len(dataloader.dataset)
+    return avg_loss, accuracy
