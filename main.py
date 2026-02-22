@@ -1,3 +1,5 @@
+import os
+
 import matplotlib.pyplot as plt
 import torch
 from torch import nn, optim
@@ -133,4 +135,6 @@ plt.plot(test_accuracies, label='Test Acc')
 plt.xlabel('Epoch')
 plt.ylabel('Accuracy (%)')
 plt.legend()
+os.makedirs("./result", exist_ok=True)
+plt.savefig("./result/loss.png", dpi=300, bbox_inches='tight')
 plt.show()
